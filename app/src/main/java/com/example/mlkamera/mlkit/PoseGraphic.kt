@@ -2,6 +2,7 @@ package com.example.mlkamera.mlkit
 
 import android.graphics.*
 import com.example.mlkamera.GraphicOverlay
+import com.example.mlkamera.MainActivity
 import com.google.mlkit.vision.pose.Pose
 import com.google.mlkit.vision.pose.PoseLandmark
 
@@ -25,7 +26,7 @@ class PoseGraphic(
 //        landmarkPositionPaint.color = selectedColor
         landmarkPositionPaint.color = Color.GREEN
         landmarkPositionPaint2 = Paint()
-        landmarkPositionPaint2.color = Color.YELLOW
+        landmarkPositionPaint2.color = Color.RED
 
         idPaint = Paint()
         idPaint.color = selectedColor
@@ -47,6 +48,12 @@ class PoseGraphic(
     }
 
     override fun draw(canvas: Canvas?) {
+
+        calculateRect(
+            imageRect.height().toFloat(),
+            imageRect.width().toFloat(),
+            imageRect
+        )
 
         val landmarks = pose.allPoseLandmarks
         if (landmarks.isEmpty()) {
@@ -137,10 +144,8 @@ class PoseGraphic(
     private fun drawPoint(canvas: Canvas?, landmark: PoseLandmark, paint: Paint) {
         val point = landmark.position
         canvas?.drawCircle(
-//            translateX(point.x),
-//            translateY(point.y),
-            point.x,
-            point.y,
+            translateX(point.x),
+            translateY(point.y),
             POSE_POSITION_RADIUS,
             paint
         )

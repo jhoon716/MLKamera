@@ -9,6 +9,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.camera.view.PreviewView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.mlkamera.mlkit.FaceContourGraphic
@@ -30,6 +31,13 @@ class MainActivity : AppCompatActivity() {
     private lateinit var outputDirectory: File
     private lateinit var cameraExecutor: ExecutorService
 
+    private var displayId: Int = -1
+    private var lensFacing: Int = CameraSelector.LENS_FACING_BACK
+    private var preview: Preview? = null
+    private var imageAnalyzer: ImageAnalysis? = null
+    private var camera: Camera? = null
+    private var cameraProvider: ProcessCameraProvider? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -43,7 +51,17 @@ class MainActivity : AppCompatActivity() {
         }
 
         // Set up the listener for take photo button
-        camera_capture_button.setOnClickListener {takePhoto()}
+        shutter_button.setOnClickListener {takePhoto()}
+
+        flip_button.setOnClickListener {
+            lensFacing = if (lensFacing == CameraSelector.LENS_FACING_FRONT) {
+                CameraSelector.LENS_FACING_BACK
+            } else {
+                CameraSelector.LENS_FACING_FRONT
+            }
+
+            bindCameraUseCases()
+        }
 
         outputDirectory = getOutputDirectory()
 
@@ -82,19 +100,19 @@ class MainActivity : AppCompatActivity() {
 
         cameraProviderFuture.addListener(Runnable {
             // Used to bind the lifecycle of cameras to the lifecycle owner
-            val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
+            cameraProvider = cameraProviderFuture.get()
 
             // Preview
-            val preview = Preview.Builder()
+            preview = Preview.Builder()
                     .build()
                     .also {
-                        it.setSurfaceProvider(viewFinder.createSurfaceProvider())
+                        it.setSurfaceProvider(viewFinder.surfaceProvider)
                     }
 
             imageCapture = ImageCapture.Builder()
                     .build()
 
-            val imageAnalyzer = ImageAnalysis.Builder()
+            imageAnalyzer = ImageAnalysis.Builder()
                     .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                     .build()
                     .also {
@@ -110,12 +128,12 @@ class MainActivity : AppCompatActivity() {
             // Select back camera as a default
             val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
 
-            try {
-                // Unbind use cases before rebinding
-                cameraProvider.unbindAll()
+            // Unbind use cases before rebinding
+            cameraProvider?.unbindAll()
 
+            try {
                 // Bind use cases to camera
-                cameraProvider.bindToLifecycle(
+                camera = cameraProvider?.bindToLifecycle(
                         this, cameraSelector, preview, imageCapture, imageAnalyzer)
 
             } catch(exc: Exception) {
@@ -157,6 +175,40 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(this, "Permissions not granted by the user.", Toast.LENGTH_SHORT).show()
                 finish()
             }
+        }
+    }
+
+    private fun bindCameraUseCases() {
+        val cameraProvider = cameraProvider
+
+        val cameraSelector = CameraSelector.Builder().requireLensFacing(lensFacing).build()
+
+        preview = Preview.Builder()
+            .build()
+
+        imageCapture = ImageCapture.Builder()
+            .build()
+
+        imageAnalyzer = ImageAnalysis.Builder()
+            .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+            .build()
+            .also {
+                it.setAnalyzer(
+                    cameraExecutor,
+                    PoseDetectionAnalyzer(graphicOverlay_finder)
+                )
+            }
+
+        cameraProvider?.unbindAll()
+
+        try {
+            camera = cameraProvider?.bindToLifecycle(
+                this, cameraSelector, preview, imageCapture, imageAnalyzer)
+
+            preview?.setSurfaceProvider(viewFinder.surfaceProvider)
+
+        } catch (exc: Exception) {
+            Log.e(TAG, "Use case binding failed", exc)
         }
     }
 }

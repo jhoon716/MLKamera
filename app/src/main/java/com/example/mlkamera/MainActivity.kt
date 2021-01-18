@@ -9,13 +9,9 @@ import android.util.Log
 import android.widget.Toast
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
-import androidx.camera.view.PreviewView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.example.mlkamera.mlkit.FaceContourGraphic
-import com.example.mlkamera.mlkit.FaceDetectionAnalyzer
-import com.example.mlkamera.mlkit.PoseDetectionAnalyzer
-import com.example.mlkamera.mlkit.TextRecognitionAnalyzer
+import com.example.mlkamera.mlkit.*
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.File
 import java.text.SimpleDateFormat
@@ -38,6 +34,8 @@ class MainActivity : AppCompatActivity() {
     private var camera: Camera? = null
     private var cameraProvider: ProcessCameraProvider? = null
 
+    var faceState: FaceState = FaceState()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -51,7 +49,10 @@ class MainActivity : AppCompatActivity() {
         }
 
         // Set up the listener for take photo button
-        shutter_button.setOnClickListener {takePhoto()}
+        shutter_button.setOnClickListener {
+            if (!faceState.getEyesOpen())
+                takePhoto()
+        }
 
         flip_button.setOnClickListener {
             lensFacing = if (lensFacing == CameraSelector.LENS_FACING_FRONT) {
@@ -70,8 +71,14 @@ class MainActivity : AppCompatActivity() {
             bindCameraUseCases()
         }
 
-        cam3.setOnClickListener {
+        cam2.setOnClickListener {
             imageAnalyzer?.setAnalyzer(cameraExecutor, PoseDetectionAnalyzer(graphicOverlay_finder))
+
+            bindCameraUseCases()
+        }
+
+        cam3.setOnClickListener {
+            imageAnalyzer?.setAnalyzer(cameraExecutor, EyeDetectionAnalyzer(faceState))
 
             bindCameraUseCases()
         }

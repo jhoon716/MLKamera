@@ -15,10 +15,7 @@ import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import com.example.mlkamera.mlkit.FaceContourGraphic
-import com.example.mlkamera.mlkit.FaceDetectionAnalyzer
-import com.example.mlkamera.mlkit.PoseDetectionAnalyzer
-import com.example.mlkamera.mlkit.TextRecognitionAnalyzer
+import com.example.mlkamera.mlkit.*
 import kotlinx.android.synthetic.main.activity_main.*
 import java.io.File
 import java.text.SimpleDateFormat
@@ -26,7 +23,6 @@ import java.util.*
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
-typealias LumaListener = (luma: Double) -> Unit
 
 class MainActivity : AppCompatActivity() {
     private var imageCapture: ImageCapture? = null
@@ -34,7 +30,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var outputDirectory: File
     private lateinit var cameraExecutor: ExecutorService
 
-    private var displayId: Int = -1
     private var lensFacing: Int = CameraSelector.LENS_FACING_BACK
     private var preview: Preview? = null
     private var imageAnalyzer: ImageAnalysis? = null
@@ -78,13 +73,25 @@ class MainActivity : AppCompatActivity() {
         cam1.setOnClickListener {
             imageAnalyzer?.setAnalyzer(cameraExecutor, FaceDetectionAnalyzer(graphicOverlay_finder))
 
-            bindCameraUseCases()
+//            bindCameraUseCases()
+        }
+
+        cam2.setOnClickListener {
+            imageAnalyzer?.setAnalyzer(cameraExecutor, PoseDetectionAnalyzer(graphicOverlay_finder))
+
+//            bindCameraUseCases()
         }
 
         cam3.setOnClickListener {
-            imageAnalyzer?.setAnalyzer(cameraExecutor, PoseDetectionAnalyzer(graphicOverlay_finder))
+            imageAnalyzer?.setAnalyzer(cameraExecutor, LanguageDetectionAnalyzer(graphicOverlay_finder))
 
-            bindCameraUseCases()
+//            bindCameraUseCases()
+        }
+
+        cam4.setOnClickListener {
+            imageAnalyzer?.setAnalyzer(cameraExecutor, TranslationAnalyzer(graphicOverlay_finder))
+
+//            bindCameraUseCases()
         }
 
         outputDirectory = getOutputDirectory()

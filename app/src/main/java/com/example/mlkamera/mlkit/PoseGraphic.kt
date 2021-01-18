@@ -2,7 +2,6 @@ package com.example.mlkamera.mlkit
 
 import android.graphics.*
 import com.example.mlkamera.GraphicOverlay
-import com.example.mlkamera.MainActivity
 import com.google.mlkit.vision.pose.Pose
 import com.google.mlkit.vision.pose.PoseLandmark
 
@@ -115,8 +114,8 @@ class PoseGraphic(
         val rightFootIndex =
             pose.getPoseLandmark(PoseLandmark.RIGHT_FOOT_INDEX)
 
-        drawLine(canvas, leftShoulder!!, rightShoulder!!, landmarkPositionPaint)
-        drawLine(canvas, leftHip!!, rightHip!!, landmarkPositionPaint)
+        drawLine(canvas, leftShoulder!!, rightShoulder!!, leftPaint)
+        drawLine(canvas, leftHip!!, rightHip!!, leftPaint)
         // Left body
         drawLine(canvas, leftShoulder, leftElbow!!, leftPaint)
         drawLine(canvas, leftElbow, leftWrist!!, leftPaint)

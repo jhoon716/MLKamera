@@ -59,6 +59,19 @@ class MainActivity : AppCompatActivity() {
             } else {
                 CameraSelector.LENS_FACING_FRONT
             }
+            graphicOverlay_finder.toggleSelector()
+
+            bindCameraUseCases()
+        }
+
+        cam1.setOnClickListener {
+            imageAnalyzer?.setAnalyzer(cameraExecutor, FaceDetectionAnalyzer(graphicOverlay_finder))
+
+            bindCameraUseCases()
+        }
+
+        cam3.setOnClickListener {
+            imageAnalyzer?.setAnalyzer(cameraExecutor, PoseDetectionAnalyzer(graphicOverlay_finder))
 
             bindCameraUseCases()
         }
@@ -118,11 +131,8 @@ class MainActivity : AppCompatActivity() {
                     .also {
                         it.setAnalyzer(
                             cameraExecutor,
-                            PoseDetectionAnalyzer(graphicOverlay_finder)
+                            FaceDetectionAnalyzer(graphicOverlay_finder)
                         )
-    //                    it.setAnalyzer(cameraExecutor, LuminosityAnalyzer { luma ->
-    //                        Log.d(TAG, "Average luminosity: $luma")
-    //                    })
                     }
 
             // Select back camera as a default
@@ -189,15 +199,15 @@ class MainActivity : AppCompatActivity() {
         imageCapture = ImageCapture.Builder()
             .build()
 
-        imageAnalyzer = ImageAnalysis.Builder()
-            .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-            .build()
-            .also {
-                it.setAnalyzer(
-                    cameraExecutor,
-                    PoseDetectionAnalyzer(graphicOverlay_finder)
-                )
-            }
+//        imageAnalyzer = ImageAnalysis.Builder()
+//            .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+//            .build()
+//            .also {
+//                it.setAnalyzer(
+//                    cameraExecutor,
+//                    PoseDetectionAnalyzer(graphicOverlay_finder)
+//                )
+//            }
 
         cameraProvider?.unbindAll()
 

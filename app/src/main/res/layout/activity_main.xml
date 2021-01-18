@@ -79,7 +79,7 @@
             android:layout_centerVertical="true"
             android:layout_marginRight="88dp"
             android:adjustViewBounds="true"
-            android:background="@drawable/round_button_flip"
+            android:background="@android:color/transparent"
             android:scaleType="fitXY"
             android:src="@drawable/ic_repeat"
             android:tint="@color/icon_grey"

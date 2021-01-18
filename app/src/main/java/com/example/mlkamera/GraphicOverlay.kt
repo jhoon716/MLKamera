@@ -62,7 +62,7 @@ open class GraphicOverlay(context: Context?, attrs: AttributeSet?) :
             overlay.mOffsetY = offsetY
 
             val mappedBox = RectF().apply {
-                left = boundingBoxT.right * scale + offsetY
+                left = boundingBoxT.right * scale + offsetX
                 top = boundingBoxT.top * scale + offsetY
                 right = boundingBoxT.left * scale + offsetX
                 bottom = boundingBoxT.bottom * scale + offsetY

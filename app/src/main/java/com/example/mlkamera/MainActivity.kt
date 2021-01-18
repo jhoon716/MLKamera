@@ -3,9 +3,12 @@ package com.example.mlkamera
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.Manifest
+import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.util.Log
+import android.view.MotionEvent
+import android.view.ScaleGestureDetector
 import android.widget.Toast
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
@@ -62,6 +65,14 @@ class MainActivity : AppCompatActivity() {
             graphicOverlay_finder.toggleSelector()
 
             bindCameraUseCases()
+        }
+
+        eye_button.setOnClickListener {
+
+        }
+
+        smile_button.setOnClickListener {
+
         }
 
         cam1.setOnClickListener {
@@ -138,6 +149,8 @@ class MainActivity : AppCompatActivity() {
             // Select back camera as a default
             val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
 
+            setUpPinchToZoom()
+
             // Unbind use cases before rebinding
             cameraProvider?.unbindAll()
 
@@ -208,6 +221,7 @@ class MainActivity : AppCompatActivity() {
 //                    PoseDetectionAnalyzer(graphicOverlay_finder)
 //                )
 //            }
+        setUpPinchToZoom()
 
         cameraProvider?.unbindAll()
 
@@ -219,6 +233,25 @@ class MainActivity : AppCompatActivity() {
 
         } catch (exc: Exception) {
             Log.e(TAG, "Use case binding failed", exc)
+        }
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    private fun setUpPinchToZoom() {
+        val listener = object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
+            override fun onScale(detector: ScaleGestureDetector): Boolean {
+                val currentZoomRatio: Float = camera?.cameraInfo?.zoomState?.value?.zoomRatio ?: 1f
+                val delta = detector.scaleFactor
+                camera?.cameraControl?.setZoomRatio(currentZoomRatio * delta)
+                return true
+            }
+        }
+        val scaleGestureDetector = ScaleGestureDetector(this, listener)
+        viewFinder.setOnTouchListener { _, event ->
+            viewFinder.post {
+                scaleGestureDetector.onTouchEvent(event)
+            }
+            return@setOnTouchListener true
         }
     }
 }

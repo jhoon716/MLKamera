@@ -7,12 +7,10 @@ import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.util.Log
-import android.view.MotionEvent
 import android.view.ScaleGestureDetector
 import android.widget.Toast
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
-import androidx.camera.view.PreviewView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.mlkamera.mlkit.*
@@ -66,32 +64,16 @@ class MainActivity : AppCompatActivity() {
 
         }
 
-        smile_button.setOnClickListener {
-
-        }
-
-        cam1.setOnClickListener {
-            imageAnalyzer?.setAnalyzer(cameraExecutor, FaceDetectionAnalyzer(graphicOverlay_finder))
-
-//            bindCameraUseCases()
-        }
-
-        cam2.setOnClickListener {
-            imageAnalyzer?.setAnalyzer(cameraExecutor, PoseDetectionAnalyzer(graphicOverlay_finder))
-
-//            bindCameraUseCases()
-        }
-
-        cam3.setOnClickListener {
-            imageAnalyzer?.setAnalyzer(cameraExecutor, LanguageDetectionAnalyzer(graphicOverlay_finder))
-
-//            bindCameraUseCases()
-        }
-
-        cam4.setOnClickListener {
-            imageAnalyzer?.setAnalyzer(cameraExecutor, TranslationAnalyzer(graphicOverlay_finder))
-
-//            bindCameraUseCases()
+        modeSwitch.setOnCheckedChangeListener { group, checkedId ->
+            when (checkedId) {
+                face_camera.id -> imageAnalyzer?.setAnalyzer(cameraExecutor, FaceDetectionAnalyzer(graphicOverlay_finder))
+                pose_camera.id -> {
+                    g_count = 0
+                    imageAnalyzer?.setAnalyzer(cameraExecutor, PoseDetectionAnalyzer(graphicOverlay_finder))
+                }
+                language_camera.id -> imageAnalyzer?.setAnalyzer(cameraExecutor, LanguageDetectionAnalyzer(graphicOverlay_finder))
+                translation_camera.id -> imageAnalyzer?.setAnalyzer(cameraExecutor, TranslationAnalyzer(graphicOverlay_finder))
+            }
         }
 
         outputDirectory = getOutputDirectory()

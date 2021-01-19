@@ -4,6 +4,12 @@ import android.graphics.*
 import com.example.mlkamera.GraphicOverlay
 import com.google.mlkit.vision.pose.Pose
 import com.google.mlkit.vision.pose.PoseLandmark
+import kotlin.math.abs
+import kotlin.math.atan2
+
+// variables used to count reps
+var g_armsUp = false
+var g_count = 0
 
 class PoseGraphic(
     overlay: GraphicOverlay,
@@ -11,39 +17,26 @@ class PoseGraphic(
     private val imageRect: Rect
 ) : GraphicOverlay.Graphic(overlay) {
 
-    private val landmarkPositionPaint: Paint
-    private val landmarkPositionPaint2: Paint
-    private val idPaint: Paint
-    private val boxPaint: Paint
-    private val leftPaint: Paint
-    private val rightPaint: Paint
+    private val rightLandmarkPaint: Paint
+    private val leftLandmarkPaint: Paint
+    private val linePaint: Paint
+    private val textPaint: Paint
 
     init {
         val selectedColor = Color.WHITE
 
-        landmarkPositionPaint = Paint()
-//        landmarkPositionPaint.color = selectedColor
-        landmarkPositionPaint.color = Color.GREEN
-        landmarkPositionPaint2 = Paint()
-        landmarkPositionPaint2.color = Color.RED
+        rightLandmarkPaint = Paint()
+        rightLandmarkPaint.color = Color.GREEN
+        leftLandmarkPaint = Paint()
+        leftLandmarkPaint.color = Color.RED
 
-        idPaint = Paint()
-        idPaint.color = selectedColor
-        idPaint.textSize = ID_TEXT_SIZE
+        linePaint = Paint()
+        linePaint.color = selectedColor
+        linePaint.strokeWidth = STROKE_WIDTH
 
-        boxPaint = Paint()
-        boxPaint.color = selectedColor
-        boxPaint.style = Paint.Style.STROKE
-        boxPaint.strokeWidth = PoseGraphic.BOX_STROKE_WIDTH
-
-        leftPaint = Paint()
-//        leftPaint.color = Color.GREEN
-        leftPaint.color = Color.WHITE
-        leftPaint.strokeWidth = BOX_STROKE_WIDTH
-        rightPaint = Paint()
-        rightPaint.color = Color.YELLOW
-        rightPaint.color = Color.WHITE
-        rightPaint.strokeWidth = BOX_STROKE_WIDTH
+        textPaint = Paint()
+        textPaint.color = selectedColor
+        textPaint.textSize = TEXT_SIZE
     }
 
     override fun draw(canvas: Canvas?) {
@@ -62,10 +55,14 @@ class PoseGraphic(
         landmarks.forEach {
 //            val px = translateX(it.position.x)
 //            val py = translateY(it.position.y)
-            if (it.landmarkType % 2 == 0)
-                drawPoint(canvas, it, landmarkPositionPaint)
+            if (it.landmarkType == PoseLandmark.RIGHT_EYE)
+                drawPoint(canvas, it, rightLandmarkPaint)
+            else if (it.landmarkType == PoseLandmark.LEFT_EYE)
+                drawPoint(canvas, it, leftLandmarkPaint)
+            else if (it.landmarkType % 2 == 0)
+                drawPoint(canvas, it, rightLandmarkPaint)
             else
-                drawPoint(canvas, it, landmarkPositionPaint2)
+                drawPoint(canvas, it, leftLandmarkPaint)
 //            canvas?.drawCircle(px, py, POSE_POSITION_RADIUS, landmarkPositionPaint)
         }
 
@@ -114,30 +111,40 @@ class PoseGraphic(
         val rightFootIndex =
             pose.getPoseLandmark(PoseLandmark.RIGHT_FOOT_INDEX)
 
-        drawLine(canvas, leftShoulder!!, rightShoulder!!, leftPaint)
-        drawLine(canvas, leftHip!!, rightHip!!, leftPaint)
+        drawLine(canvas, leftShoulder!!, rightShoulder!!, linePaint)
+        drawLine(canvas, leftHip!!, rightHip!!, linePaint)
         // Left body
-        drawLine(canvas, leftShoulder, leftElbow!!, leftPaint)
-        drawLine(canvas, leftElbow, leftWrist!!, leftPaint)
-        drawLine(canvas, leftShoulder, leftHip, leftPaint)
-        drawLine(canvas, leftHip, leftKnee!!, leftPaint)
-        drawLine(canvas, leftKnee, leftAnkle!!, leftPaint)
-        drawLine(canvas, leftWrist, leftThumb!!, leftPaint)
-        drawLine(canvas, leftWrist, leftPinky!!, leftPaint)
-        drawLine(canvas, leftWrist, leftIndex!!, leftPaint)
-        drawLine(canvas, leftAnkle, leftHeel!!, leftPaint)
-        drawLine(canvas, leftHeel, leftFootIndex!!, leftPaint)
+        drawLine(canvas, leftShoulder, leftElbow!!, linePaint)
+        drawLine(canvas, leftElbow, leftWrist!!, linePaint)
+        drawLine(canvas, leftShoulder, leftHip, linePaint)
+        drawLine(canvas, leftHip, leftKnee!!, linePaint)
+        drawLine(canvas, leftKnee, leftAnkle!!, linePaint)
+        drawLine(canvas, leftWrist, leftThumb!!, linePaint)
+        drawLine(canvas, leftWrist, leftPinky!!, linePaint)
+        drawLine(canvas, leftWrist, leftIndex!!, linePaint)
+        drawLine(canvas, leftAnkle, leftHeel!!, linePaint)
+        drawLine(canvas, leftHeel, leftFootIndex!!, linePaint)
         // Right body
-        drawLine(canvas, rightShoulder, rightElbow!!, rightPaint)
-        drawLine(canvas, rightElbow, rightWrist!!, rightPaint)
-        drawLine(canvas, rightShoulder, rightHip, rightPaint)
-        drawLine(canvas, rightHip, rightKnee!!, rightPaint)
-        drawLine(canvas, rightKnee, rightAnkle!!, rightPaint)
-        drawLine(canvas, rightWrist, rightThumb!!, rightPaint)
-        drawLine(canvas, rightWrist, rightPinky!!, rightPaint)
-        drawLine(canvas, rightWrist, rightIndex!!, rightPaint)
-        drawLine(canvas, rightAnkle, rightHeel!!, rightPaint)
-        drawLine(canvas, rightHeel, rightFootIndex!!, rightPaint)
+        drawLine(canvas, rightShoulder, rightElbow!!, linePaint)
+        drawLine(canvas, rightElbow, rightWrist!!, linePaint)
+        drawLine(canvas, rightShoulder, rightHip, linePaint)
+        drawLine(canvas, rightHip, rightKnee!!, linePaint)
+        drawLine(canvas, rightKnee, rightAnkle!!, linePaint)
+        drawLine(canvas, rightWrist, rightThumb!!, linePaint)
+        drawLine(canvas, rightWrist, rightPinky!!, linePaint)
+        drawLine(canvas, rightWrist, rightIndex!!, linePaint)
+        drawLine(canvas, rightAnkle, rightHeel!!, linePaint)
+        drawLine(canvas, rightHeel, rightFootIndex!!, linePaint)
+
+        // Angles of elbows and knees
+//        drawAngle(canvas, leftShoulder, leftElbow, leftWrist, textPaint)
+//        drawAngle(canvas, rightShoulder, rightElbow, rightWrist, textPaint)
+//        drawAngle(canvas, leftHip, leftKnee, leftAnkle, textPaint)
+//        drawAngle(canvas, leftHip, rightKnee, rightAnkle, textPaint)
+
+        // Count squats
+        countJumpingJacks(canvas, leftShoulder, leftElbow, leftHip, rightShoulder, rightElbow, rightHip, textPaint)
+//        countSquats(canvas, rightShoulder, rightHip, rightKnee, rightAnkle, textPaint)
     }
 
     private fun drawPoint(canvas: Canvas?, landmark: PoseLandmark, paint: Paint) {
@@ -165,9 +172,56 @@ class PoseGraphic(
         } catch (e: NullPointerException) {}
     }
 
+    private fun getAngle(firstPoint: PoseLandmark, midPoint: PoseLandmark, lastPoint: PoseLandmark): Double {
+        var result = Math.toDegrees(
+                (atan2(lastPoint.position.y - midPoint.position.y,
+                        lastPoint.position.x - midPoint.position.x)
+                        - atan2(firstPoint.position.y - midPoint.position.y,
+                        firstPoint.position.x - midPoint.position.x)).toDouble())
+        result = abs(result) // Angle should never be negative
+        if (result > 180) {
+            result = 360.0 - result // Always get the acute representation of the angle
+        }
+        return result
+    }
+
+    private fun drawAngle(
+            canvas: Canvas?,
+            firstPoint: PoseLandmark
+            , midPoint: PoseLandmark,
+            lastPoint: PoseLandmark,
+            paint: Paint) {
+        var angle = String.format("%.2f", getAngle(firstPoint, midPoint, lastPoint))
+        canvas?.drawText(
+                angle,
+                translateX(midPoint.position.x),
+                translateY(midPoint.position.y),
+                paint)
+    }
+
+    private fun countJumpingJacks(
+            canvas: Canvas?,
+            leftShoulder: PoseLandmark,
+            leftElbow: PoseLandmark,
+            leftHip: PoseLandmark,
+            rightShoulder: PoseLandmark,
+            rightElbow: PoseLandmark,
+            rightHip: PoseLandmark,
+            paint: Paint) {
+        val leftShoulderAngle = getAngle(leftElbow, leftShoulder, leftHip)
+        val rightShoulderAngle = getAngle(rightElbow, rightShoulder, rightHip)
+        if (leftShoulderAngle >= 90 && rightShoulderAngle >= 90) {
+            g_armsUp = true
+        } else if (leftShoulderAngle < 90 && rightShoulderAngle < 90 && g_armsUp) {
+            g_count += 1
+            g_armsUp = false
+        }
+        canvas?.drawText(g_count.toString(), 10f, 200f, paint)
+    }
+
     companion object {
         private const val POSE_POSITION_RADIUS = 8.0F
-        private const val ID_TEXT_SIZE = 30.0F
-        private const val BOX_STROKE_WIDTH = 5.0F
+        private const val TEXT_SIZE = 120.0F
+        private const val STROKE_WIDTH = 5.0F
     }
 }

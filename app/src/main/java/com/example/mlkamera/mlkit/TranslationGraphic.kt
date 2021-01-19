@@ -18,7 +18,7 @@ class TranslationGraphic(
 
     private val rectPaint = Paint().apply {
         color =
-            TEXT_COLOR
+            RECT_COLOR
         style = Paint.Style.FILL
         alpha = 50
     }
@@ -48,7 +48,8 @@ class TranslationGraphic(
 
     companion object {
         private const val TEXT_COLOR = Color.WHITE
-        private const val TEXT_SIZE = 54.0f
+        private const val TEXT_SIZE = 120.0f
+        private const val RECT_COLOR = Color.BLACK
         private const val ROUND_RECT_CORNER = 8F
         private const val TAG = "Translation"
     }

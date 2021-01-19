@@ -47,7 +47,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         // Set up the listener for take photo button
-        shutter_button.setOnClickListener {takePhoto()}
+//        shutter_button.setOnClickListener {takePhoto()}
 
         flip_button.setOnClickListener {
             lensFacing = if (lensFacing == CameraSelector.LENS_FACING_FRONT) {
@@ -60,11 +60,7 @@ class MainActivity : AppCompatActivity() {
             bindCameraUseCases()
         }
 
-        eye_button.setOnClickListener {
-
-        }
-
-        modeSwitch.setOnCheckedChangeListener { group, checkedId ->
+        modeSwitch.setOnCheckedChangeListener { _, checkedId ->
             when (checkedId) {
                 face_camera.id -> imageAnalyzer?.setAnalyzer(cameraExecutor, FaceDetectionAnalyzer(graphicOverlay_finder))
                 pose_camera.id -> {

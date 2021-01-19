@@ -34,40 +34,15 @@
         app:layout_constraintBottom_toBottomOf="parent">
 
         <androidx.appcompat.widget.AppCompatImageButton
-            android:layout_width="28dp"
-            android:layout_height="20dp"
-            android:id="@+id/eye_button"
-            android:background="@drawable/ic_blink"
-            android:backgroundTint="@color/icon_grey"
-            android:layout_centerVertical="true"
-            android:layout_marginLeft="88dp"
-            android:layout_alignParentStart="true"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent" />
-
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/shutter_button"
+            android:id="@+id/flip_button"
             android:layout_width="70dp"
             android:layout_height="70dp"
             android:background="@drawable/round_button"
+            android:src="@drawable/ic_repeat"
             android:layout_centerVertical="true"
             android:layout_centerHorizontal="true"
             android:layout_margin="10dp"
             app:layout_constraintBottom_toBottomOf="parent" />
-
-        <androidx.appcompat.widget.AppCompatImageButton
-            android:id="@+id/flip_button"
-            android:layout_width="28dp"
-            android:layout_height="28dp"
-            android:layout_alignParentEnd="true"
-            android:layout_marginRight="88dp"
-            android:layout_centerVertical="true"
-            android:adjustViewBounds="true"
-            android:background="@android:color/transparent"
-            android:scaleType="fitXY"
-            android:src="@drawable/ic_repeat"
-            android:tint="@color/icon_grey"
-            app:layout_constraintStart_toEndOf="@+id/shutter_button" />
     </RelativeLayout>
 
     <LinearLayout
